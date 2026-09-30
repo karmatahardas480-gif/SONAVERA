@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 import { getProduct } from "@/lib/products";
-import { supabaseInsertOrder, supabaseUpdateOrderByRazorpayOrderId } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 
@@ -65,32 +64,8 @@ export async function POST(request: Request) {
       .join(", ")
       .slice(0, 500);
 
-    try {
-      const saved = await supabaseUpdateOrderByRazorpayOrderId(razorpay_order_id, {
-        payment_id: razorpay_payment_id,
-        payment_status: payment.status === "captured" ? "paid" : "authorized",
-      });
-
-      if (!saved) {
-        await supabaseInsertOrder({
-          order_id: razorpay_order_id,
-          razorpay_order_id,
-          payment_id: razorpay_payment_id,
-          payment_status: payment.status === "captured" ? "paid" : "authorized",
-          customer_name: customerName,
-          customer_mobile: customerMobile,
-          customer_email: customerEmail || null,
-          delivery_address: customerAddress,
-          items: resolvedItems,
-          amount: total,
-          currency: "INR",
-        });
-      }
-    } catch (dbError: any) {
-      console.error("Supabase payment save failed", dbError);
-      return NextResponse.json({ verified: false, error: "Payment was verified, but order saving failed. Please contact SONAVERA support with your Payment ID." }, { status: 500 });
-    }
-
+    // Razorpay is the source of truth for the order/payment record.
+    // No Supabase write is required after verification.
     return NextResponse.json({ verified: true, orderId: razorpay_order_id, paymentId: razorpay_payment_id });
   } catch (error: any) {
     return NextResponse.json({ verified: false, error: error?.message || "Verification failed." }, { status: 500 });

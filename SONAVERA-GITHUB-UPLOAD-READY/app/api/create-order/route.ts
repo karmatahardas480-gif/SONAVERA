@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { getProduct } from "@/lib/products";
-import { supabaseInsertOrder } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 
@@ -66,34 +65,14 @@ export async function POST(request: Request) {
         customer_city: city,
         customer_state: state,
         customer_pincode: pincode,
+        customer_address: address,
         items: resolved.map((row: { item: { slug: string; quantity: number }; product: ReturnType<typeof getProduct> }) => `${row.product!.name} x${row.item.quantity}`).join(" | ").slice(0, 240),
       },
     });
 
-    try {
-      await supabaseInsertOrder({
-        order_id: order.id,
-        razorpay_order_id: order.id,
-        payment_status: "created",
-        customer_name: name,
-        customer_mobile: phone.replace(/\D/g, ""),
-        customer_email: email || null,
-        delivery_address: `${address}, ${city}, ${state} - ${pincode}`.slice(0, 500),
-        items: resolved.map((row) => ({
-          slug: row.product!.slug,
-          name: row.product!.name,
-          price: row.product!.price,
-          quantity: row.item.quantity,
-        })),
-        amount: total,
-        currency: "INR",
-      });
-    } catch (dbError: any) {
-      console.error("Supabase order create failed", dbError);
-      // Do not block a Razorpay order if the database is temporarily unavailable.
-      // The verification route will attempt to save it again after successful payment.
-    }
-
+    // Razorpay itself is the order/payment record. We intentionally do not
+    // write orders to Supabase here. Customer/order details are stored in
+    // Razorpay order notes and shown in the protected admin panel.
     return NextResponse.json({ id: order.id, amount: order.amount, currency: order.currency, key: keyId });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Could not create payment order." }, { status: 500 });

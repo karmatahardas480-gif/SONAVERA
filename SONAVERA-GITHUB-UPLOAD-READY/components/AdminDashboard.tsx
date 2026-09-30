@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   return (
     <main className="checkout admin-page">
-      <div className="admin-top"><div><span className="eyebrow">SONAVERA JEWELS</span><h1>Admin Dashboard</h1><p className="muted">Catalog, payment status and customer orders from Supabase.</p></div><button className="btn light" onClick={logout}>Logout</button></div>
+      <div className="admin-top"><div><span className="eyebrow">SONAVERA JEWELS</span><h1>Admin Dashboard</h1><p className="muted">Catalog, payment status and customer orders from Razorpay.</p></div><button className="btn light" onClick={logout}>Logout</button></div>
       <section className="panel">
         <div className="admin-section-head"><h2>Products ({products.length})</h2><span className="admin-pill">Live catalog</span></div>
         <div className="admin-products">{products.map((p) => <div className="admin-product" key={p.slug}><img src={p.images[0]} alt=""/><div><strong>{p.name}</strong><span>₹{p.price.toLocaleString("en-IN")}</span><small>{p.slug}</small></div></div>)}</div>

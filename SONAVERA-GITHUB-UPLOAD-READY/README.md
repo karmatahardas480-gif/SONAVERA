@@ -76,14 +76,15 @@ npm start
 - The server calculates the order amount from the product catalog instead of trusting the browser's total.
 - The payment signature, Razorpay order amount, currency and payment/order relationship are checked server-side.
 - Razorpay is the source of truth for the recent orders shown in the admin dashboard.
-- If you later need permanent order fulfilment records, connect a database such as Supabase; this ZIP intentionally does not require one to deploy the storefront.
+- 
 
+## Orders & Admin
 
-## Supabase Orders
+Orders are stored in Razorpay itself. Customer delivery details and cart items are saved in the Razorpay order notes, and the protected `/admin` dashboard reads the latest orders directly from Razorpay. No Supabase database is required for order storage.
 
-The production checkout now saves orders into the Supabase `orders` table after Razorpay verification. Add these Vercel environment variables:
+Set these Vercel environment variables:
 
-- `NEXT_PUBLIC_SUPABASE_URL` — your Supabase project URL
-- `SUPABASE_SECRET_KEY` — your server-only Supabase `sb_secret_...` key
-
-The secret key must never be exposed in browser/client code. The `/admin` dashboard reads orders server-side after admin login.
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `ADMIN_PASSWORD`
+- `RAZORPAY_WEBHOOK_SECRET` (only if you configure the webhook)
