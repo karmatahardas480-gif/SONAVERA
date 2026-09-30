@@ -1,0 +1,3 @@
+SONAVERA JEWELS brand assets are included in public/brand/.
+Header logo: /brand/sonavera-logo.png
+Small mark/favicon: /brand/sonavera-mark.png

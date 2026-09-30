@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound(){return <main className="success"><div className="panel"><h1 style={{fontFamily:"Georgia,serif"}}>Product not found</h1><Link className="btn gold" href="/">Back to SONAVERA</Link></div></main>}
