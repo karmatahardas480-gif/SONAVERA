@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabaseUpdateOrderByRazorpayOrderId } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 
@@ -19,21 +18,8 @@ export async function POST(request: Request) {
 
   try {
     const event = JSON.parse(raw);
-    const payment = event?.payload?.payment?.entity;
-    const razorpayOrderId = payment?.order_id;
-    if (razorpayOrderId) {
-      const eventName = String(event?.event || "");
-      let paymentStatus: string | null = null;
-      if (eventName === "payment.captured") paymentStatus = "paid";
-      else if (eventName === "payment.authorized") paymentStatus = "authorized";
-      else if (eventName === "payment.failed") paymentStatus = "failed";
-      if (paymentStatus) {
-        await supabaseUpdateOrderByRazorpayOrderId(razorpayOrderId, {
-          payment_id: payment.id || undefined,
-          payment_status: paymentStatus,
-        });
-      }
-    }
+    // Razorpay retains payment/order state. The admin panel reads the live
+    // Razorpay records, so no separate database update is necessary here.
     return NextResponse.json({ received: true, event: event?.event || "unknown" });
   } catch {
     return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
